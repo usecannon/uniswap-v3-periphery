@@ -1,0 +1,97 @@
+name = "uniswap"
+version = "3.0.0"
+
+[setting.owner]
+defaultValue = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+
+[setting.deployer]
+defaultValue = "0x6c9fc64a53c1b71fb3f9af64d1ae3a4931a5f4e9"
+
+[setting.nativeCurrencyLabel]
+defaultValue = "ETH"
+
+[provision.Core]
+source = "uniswap-core:3.0.0"
+options.deployer = "<%= settings.deployer %>"
+
+[contract.ProxyAdmin]
+artifact = "ProxyAdmin"
+
+[contract.TickLens]
+artifact = "TickLens"
+
+[contract.Quoter]
+artifact = "Quoter"
+args = [
+    "<%= imports.Core.contracts.UniswapV3Factory.address %>",
+    "<%= AddressZero %>", # TODO: use actual WETH address
+]
+
+depends = ["provision.Core"]
+
+[contract.SwapRouter]
+artifact = "SwapRouter"
+args = [
+    "<%= imports.Core.contracts.UniswapV3Factory.address %>",
+    "<%= AddressZero %>", # TODO: use actual WETH address
+]
+
+depends = ["provision.Core"]
+
+[contract.NFTDescriptor]
+artifact = "NFTDescriptor"
+
+[contract.NonfungibleTokenPositionDescriptor]
+artifact = "NonfungibleTokenPositionDescriptor"
+
+args = [
+    "<%= AddressZero %>", # TODO: use actual WETH address
+    "<%= formatBytes32String(settings.nativeCurrencyLabel) %>"
+]
+
+libraries.NFTDescriptor = "<%= contracts.NFTDescriptor.address %>"
+depends = ["contract.NFTDescriptor"]
+
+[contract.TransparentUpgradeableProxy]
+artifact = "TransparentUpgradeableProxy"
+args = [
+    "<%= contracts.NonfungibleTokenPositionDescriptor.address %>",
+    "<%= contracts.ProxyAdmin.address %>",
+    "0x"
+]
+
+depends = [
+    "contract.NonfungibleTokenPositionDescriptor",
+    "contract.ProxyAdmin"
+]
+
+[contract.NonfungiblePositionManager]
+artifact = "NonfungiblePositionManager"
+args = [
+    "<%= imports.Core.contracts.UniswapV3Factory.address %>",
+    "<%= AddressZero %>", # TODO: use actual WETH address
+    "<%= contracts.NonfungibleTokenPositionDescriptor.address %>"
+]
+
+depends = ["provision.Core", "contract.NonfungibleTokenPositionDescriptor"]
+
+# V3 migrator really isnt needed for V3 but I put the theoretical deployment here anyway
+#[contract.V3Migrator]
+#artifact = "V3Migrator"
+#from = "<%= settings.deployer %>"
+
+#args = [
+#    "<%= imports.Core.contracts.UniswapV3Factory.address %>",
+#    "<%= AddressZero %>", # TODO: use actual WETH address
+#    "<%= contracts.NonfungiblePositionManager.address %>"
+#]
+
+#depends = ["contract.NonfungiblePositionManager"]
+
+[invoke.setOwner]
+target = ["Core.UniswapV3Factory"]
+func = "setOwner"
+args = ["<%= settings.owner %>"]
+fromCall.func = "owner"
+
+depends = ["provision.Core"]
