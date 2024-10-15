@@ -1,5 +1,5 @@
 name = "uniswap"
-version = "3.0.0"
+version = "3.0.1"
 
 [var.main]
 owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
@@ -11,7 +11,7 @@ source = "uniswap-core:3.0.0"
 options.deployer = "<%= settings.deployer %>"
 
 [pull.WETH]
-source = "weth:9"
+source = "weth-token"
 
 [deploy.ProxyAdmin]
 artifact = "ProxyAdmin"
@@ -19,26 +19,28 @@ artifact = "ProxyAdmin"
 [deploy.TickLens]
 artifact = "TickLens"
 
-[deploy.Quoter]
-artifact = "Quoter"
+[deploy.QuoterV2]
+artifact = "QuoterV2"
 args = [
     "<%= Core.UniswapV3Factory.address %>",
-    "<%= WETH.WETH9.address %>",
+    "<%= WETH.Token.address %>",
 ]
+depends = ["clone.Core", "pull.WETH"]
 
 [deploy.SwapRouter]
 artifact = "SwapRouter"
 args = [
     "<%= Core.UniswapV3Factory.address %>",
-    "<%= WETH.WETH9.address %>",
+    "<%= WETH.Token.address %>",
 ]
+depends = ["clone.Core", "pull.WETH"]
+
 
 [deploy.NFTDescriptor]
 artifact = "NFTDescriptor"
 
 [deploy.NonfungibleTokenPositionDescriptor]
 artifact = "NonfungibleTokenPositionDescriptor"
-
 args = [
     "<%= AddressZero %>", # TODO: use actual WETH address
     "<%= formatBytes32String(settings.nativeCurrencyLabel) %>"
@@ -55,14 +57,16 @@ args = [
     "<%= ProxyAdmin.address %>",
     "0x"
 ]
+depends = ["deploy.NonfungibleTokenPositionDescriptor", "deploy.ProxyAdmin"]
 
 [deploy.NonfungiblePositionManager]
 artifact = "NonfungiblePositionManager"
 args = [
     "<%= Core.UniswapV3Factory.address %>",
-    "<%= WETH.WETH9.address %>",
+    "<%= WETH.Token.address %>",
     "<%= NonfungibleTokenPositionDescriptor.address %>"
 ]
+depends = ["deploy.NonfungibleTokenPositionDescriptor", "pull.WETH", "clone.Core"]
 
 # V3 migrator really isnt needed for V3 but I put the theoretical deployment here anyway
 #[deploy.V3Migrator]

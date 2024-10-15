@@ -49,6 +49,7 @@ const DEFAULT_COMPILER_SETTINGS = {
 }
 
 export default {
+  defaultNetwork: 'cannon',
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
