@@ -3,7 +3,7 @@ version = "3.0.1"
 
 [var.main]
 owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-deployer = "0x6c9fc64a53c1b71fb3f9af64d1ae3a4931a5f4e9"
+deployer = "0xca7777aB932E8F0b930dE9F0d96f4E9a2a00DdD3"
 nativeCurrencyLabel = "ETH"
 
 [clone.Core]
