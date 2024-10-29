@@ -67,7 +67,7 @@ export default {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
     },
     sepolia: {
-      url: `https://sepolia.infura.io/v3/6770454bc6ea42c58aac12978531b93f`,
+      url: `https://sepolia.infura.io/v3//${process.env.INFURA_API_KEY}`,
       accounts: process.env.PRIVATE_KEY?.split(','),
       chainId: 11155111,
     },
